@@ -7,16 +7,22 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CodeLeapChallengeAPI_06022025.Data.Class;
 using CodeLeapChallengeAPI_06022025.Data.Context;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace CodeLeapChallengeAPI_06022025.Controllers
 {
     public class UserInforsController : Controller
     {
         private readonly CodeDBContext _context;
-
-        public UserInforsController(CodeDBContext context)
+        private readonly IConfiguration _config;
+        public UserInforsController(CodeDBContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
         }
 
         // GET: UserInfors
@@ -86,6 +92,7 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Edit(string id, [Bind("UserName,Password,Email,Sex,AccountType")] UserInfor userInfor)
         {
             if (id != userInfor.UserName)
@@ -117,6 +124,7 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         }
 
         // GET: UserInfors/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -152,6 +160,39 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         private bool UserInforExists(string id)
         {
             return _context.Users.Any(e => e.UserName == id);
+        }
+
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] LoginRequest request)
+        {
+            if (request.Username == "admin" && request.Password == "123456") // Thay bằng kiểm tra DB
+            {
+                var token = GenerateJwtToken(request.Username);
+                return Ok(new { token });
+            }
+            return Unauthorized();
+        }
+        private string GenerateJwtToken(string username)
+        {
+            var jwtSettings = _config.GetSection("JwtSettings");
+            var secretKey = Encoding.UTF8.GetBytes(jwtSettings["Secret"]);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                new Claim(ClaimTypes.Name, username),
+                new Claim("role", "admin") // Thêm quyền
+            }),
+                Expires = DateTime.UtcNow.AddHours(1), // Hết hạn sau 1 giờ
+                Issuer = jwtSettings["Issuer"],
+                Audience = jwtSettings["Audience"],
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKey), SecurityAlgorithms.HmacSha256)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
     }
 }
