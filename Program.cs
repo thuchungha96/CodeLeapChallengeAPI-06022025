@@ -32,7 +32,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(secretKey)
         };
     });
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

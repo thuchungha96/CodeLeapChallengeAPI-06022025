@@ -12,9 +12,12 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace CodeLeapChallengeAPI_06022025.Controllers
 {
+    [ApiController]
+    [Route("userinfor")]
     public class UserInforsController : Controller
     {
         private readonly CodeDBContext _context;
@@ -32,6 +35,8 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         }
 
         // GET: UserInfors/Details/5
+        [Authorize]
+        [HttpGet("details")]
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -53,22 +58,6 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         public IActionResult Create()
         {
             return View();
-        }
-
-        // POST: UserInfors/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserName,Password,Email,Sex,AccountType")] UserInfor userInfor)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(userInfor);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(userInfor);
         }
 
         // GET: UserInfors/Edit/5
@@ -124,7 +113,6 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         }
 
         // GET: UserInfors/Delete/5
-        [Authorize]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -163,14 +151,38 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
         {
-            if (request.Username == "admin" && request.Password == "123456") // Thay bằng kiểm tra DB
+            if (String.IsNullOrEmpty(request.Username) || String.IsNullOrEmpty(request.Password) || Regex.IsMatch(request.Username, "^[A-Za-z]+$"))
+            {
+                return Unauthorized();
+            }    
+            var userInfor = await _context.Users.FirstOrDefaultAsync(m => m.UserName == request.Username && m.Password == request.Password); // Can do with base64 pass but just so little bit lazzy
+
+            if (userInfor != null)
             {
                 var token = GenerateJwtToken(request.Username);
                 return Ok(new { token });
             }
             return Unauthorized();
+        }
+        [HttpPost("createuser")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("UserName,Password,Email,Sex,AccountType")] UserInfor userInfor)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == userInfor.UserName); 
+                if (user != null)
+                {
+                    return ValidationProblem();
+                }
+
+                _context.Add(userInfor);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(userInfor);
         }
         private string GenerateJwtToken(string username)
         {
