@@ -35,26 +35,6 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             return View(await _context.Users.ToListAsync());
         }
 
-        // GET: UserInfors/Details/5
-        [Authorize]
-        [HttpGet("details")]
-        public async Task<IActionResult> Details(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var userInfor = await _context.Users
-                .FirstOrDefaultAsync(m => m.UserName == id);
-            if (userInfor == null)
-            {
-                return NotFound();
-            }
-
-            return View(userInfor);
-        }
-
         // GET: UserInfors/Create
         public IActionResult Create()
         {
@@ -121,7 +101,7 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
         {
-            if (String.IsNullOrEmpty(request.Username) || String.IsNullOrEmpty(request.Password) || !Regex.IsMatch(request.Username, "^[A-Za-z]+$"))
+            if (String.IsNullOrEmpty(request.Username) || String.IsNullOrEmpty(request.Password) || !IsValidEmail(request.Username))
             {
                 return Unauthorized();
             }    
@@ -140,7 +120,7 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == userInfor.UserName); 
-                if (user != null)
+                if (user != null || !IsValidEmail(userInfor.UserName))
                 {
                     return Unauthorized();
                 }
@@ -154,16 +134,34 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
 
         [HttpPost("delete")]
         [Authorize]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(string userName)
         {
-            var userInfor = await _context.Users.FindAsync(id);
-            if (userInfor != null)
+            var user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == userName);
+            if (user != null)
             {
-                _context.Users.Remove(userInfor);
+                _context.Users.Remove(user);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+        // GET: UserInfors/Details/5
+        [Authorize]
+        [HttpGet("details")]
+        public async Task<IActionResult> Details(string userName)
+        {
+            if (userName == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == userName);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
         }
         private string GenerateJwtToken(string username)
         {
@@ -186,6 +184,11 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+        private static bool IsValidEmail(string email)
+        {
+            string pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+            return Regex.IsMatch(email, pattern);
         }
     }
 }
