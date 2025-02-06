@@ -41,7 +41,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseAuthorization();
+app.UseAuthentication(); // Xác thực JWT trước
+app.UseAuthorization();  // Xác thực quyền truy cập
 
 app.MapControllers();
 
