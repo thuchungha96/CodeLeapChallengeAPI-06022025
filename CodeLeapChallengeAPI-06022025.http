@@ -1,0 +1,6 @@
+@CodeLeapChallengeAPI_06022025_HostAddress = http://localhost:5151
+
+GET {{CodeLeapChallengeAPI_06022025_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
