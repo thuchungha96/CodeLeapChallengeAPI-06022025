@@ -14,6 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
 using NuGet.Common;
+using Newtonsoft.Json;
 
 namespace CodeLeapChallengeAPI_06022025.Controllers
 {
@@ -35,33 +36,7 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             return View(await _context.Users.ToListAsync());
         }
 
-        // GET: UserInfors/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // GET: UserInfors/Edit/5
-        public async Task<IActionResult> Edit(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var userInfor = await _context.Users.FindAsync(id);
-            if (userInfor == null)
-            {
-                return NotFound();
-            }
-            return View(userInfor);
-        }
-
-        // POST: UserInfors/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost("edit")]
         [Authorize]
         public async Task<IActionResult> Edit(string id, [Bind("UserName,Password,Email,Sex,AccountType")] UserInfor userInfor)
         {
@@ -88,9 +63,8 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
-            return View(userInfor);
+            return Ok();
         }
 
         private bool UserInforExists(string id)
@@ -137,31 +111,31 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         public async Task<IActionResult> DeleteConfirmed(string userName)
         {
             var user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == userName);
-            if (user != null)
-            {
-                _context.Users.Remove(user);
-            }
-
+            if (user == null)
+                return NotFound();
+            _context.Users.Remove(user);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return Ok();
         }
         // GET: UserInfors/Details/5
         [Authorize]
         [HttpGet("details")]
         public async Task<IActionResult> Details(string userName)
         {
-            if (userName == null)
-            {
+            if (String.IsNullOrEmpty(userName) == null)
                 return NotFound();
-            }
 
-            var user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == userName);
+            var user = await _context.Users.Where(m => m.UserName == userName).Select(o => new
+            {
+                o.UserName,
+                o.Email,
+                o.Sex
+            }).FirstOrDefaultAsync();
             if (user == null)
             {
                 return NotFound();
             }
-
-            return View(user);
+            return Ok(JsonConvert.SerializeObject(user).ToString());
         }
         private string GenerateJwtToken(string username)
         {

@@ -13,5 +13,6 @@ namespace CodeLeapChallengeAPI_06022025.Data.Context
         }
 
         public DbSet<UserInfor> Users { get; set; }
+        public DbSet<Product> Products { get; set; }
     }
 }
