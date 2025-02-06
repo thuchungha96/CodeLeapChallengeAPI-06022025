@@ -30,4 +30,18 @@ namespace CodeLeapChallengeAPI_06022025.Data.Class
         /// </summary>
         public int? AccountType { get; set; }
     }
+    /// <summary>
+    /// Login Request
+    /// </summary>
+    public class LoginRequest
+    {
+        /// <summary>
+        /// Username
+        /// </summary>
+        public string Username { get; set; }
+        /// <summary>
+        /// Password
+        /// </summary>
+        public string Password { get; set; }
+    }
 }
