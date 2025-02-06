@@ -13,6 +13,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
+using NuGet.Common;
 
 namespace CodeLeapChallengeAPI_06022025.Controllers
 {
@@ -112,39 +113,6 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             return View(userInfor);
         }
 
-        // GET: UserInfors/Delete/5
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var userInfor = await _context.Users
-                .FirstOrDefaultAsync(m => m.UserName == id);
-            if (userInfor == null)
-            {
-                return NotFound();
-            }
-
-            return View(userInfor);
-        }
-
-        // POST: UserInfors/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            var userInfor = await _context.Users.FindAsync(id);
-            if (userInfor != null)
-            {
-                _context.Users.Remove(userInfor);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
         private bool UserInforExists(string id)
         {
             return _context.Users.Any(e => e.UserName == id);
@@ -153,7 +121,7 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
         {
-            if (String.IsNullOrEmpty(request.Username) || String.IsNullOrEmpty(request.Password) || Regex.IsMatch(request.Username, "^[A-Za-z]+$"))
+            if (String.IsNullOrEmpty(request.Username) || String.IsNullOrEmpty(request.Password) || !Regex.IsMatch(request.Username, "^[A-Za-z]+$"))
             {
                 return Unauthorized();
             }    
@@ -167,7 +135,6 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             return Unauthorized();
         }
         [HttpPost("createuser")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("UserName,Password,Email,Sex,AccountType")] UserInfor userInfor)
         {
             if (ModelState.IsValid)
@@ -175,14 +142,28 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
                 var user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == userInfor.UserName); 
                 if (user != null)
                 {
-                    return ValidationProblem();
+                    return Unauthorized();
                 }
 
                 _context.Add(userInfor);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return Ok(new { userInfor.UserName });
             }
-            return View(userInfor);
+            return Ok(new { userInfor.UserName });
+        }
+
+        [HttpPost("delete")]
+        [Authorize]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            var userInfor = await _context.Users.FindAsync(id);
+            if (userInfor != null)
+            {
+                _context.Users.Remove(userInfor);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
         private string GenerateJwtToken(string username)
         {
