@@ -30,12 +30,6 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             _config = config;
         }
 
-        // GET: UserInfors
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Users.ToListAsync());
-        }
-
         [HttpPost("edit")]
         [Authorize]
         public async Task<IActionResult> Edit(string id, [Bind("UserName,Password,Email,Sex,AccountType")] UserInfor userInfor)
@@ -65,11 +59,6 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
                 }
             }
             return Ok();
-        }
-
-        private bool UserInforExists(string id)
-        {
-            return _context.Users.Any(e => e.UserName == id);
         }
 
         [HttpPost("login")]
@@ -137,6 +126,7 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             }
             return Ok(JsonConvert.SerializeObject(user).ToString());
         }
+        [NonAction]
         private string GenerateJwtToken(string username)
         {
             var jwtSettings = _config.GetSection("JwtSettings");
@@ -159,10 +149,16 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+        [NonAction]
         private static bool IsValidEmail(string email)
         {
             string pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
             return Regex.IsMatch(email, pattern);
+        }
+        [NonAction]
+        private bool UserInforExists(string id)
+        {
+            return _context.Users.Any(e => e.UserName == id);
         }
     }
 }

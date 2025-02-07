@@ -35,7 +35,7 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
 
                 _context.Add(product);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return Ok();
             }
             return Ok();
         }
@@ -101,7 +101,7 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             }
             return Ok(JsonConvert.SerializeObject(listproducts).ToString());
         }
-
+        [NonAction]
         private bool ProductExists(int id)
         {
             return _context.Products.Any(e => e.Id == id);
