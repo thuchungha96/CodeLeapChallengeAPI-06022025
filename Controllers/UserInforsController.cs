@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using NuGet.Common;
 using Newtonsoft.Json;
 using CodeLeapChallengeAPI_06022025.Data.Dto;
+using Microsoft.AspNetCore.Identity;
 
 namespace CodeLeapChallengeAPI_06022025.Controllers
 {
@@ -208,6 +209,18 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
                 return GetRes(r);
             }
             r.ResponseData = user;
+            return GetRes(r);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            // Invalidate the JWT (add to blacklist if needed)
+            ResponseDto<object> r = new ResponseDto<object>();
+            r.RespnseStatus.ResponseMessage = "Logged out successfully";
             return GetRes(r);
         }
         [NonAction]

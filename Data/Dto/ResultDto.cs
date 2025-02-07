@@ -17,7 +17,7 @@
         /// <summary>
         /// 
         /// </summary>
-        public ResponseSta? RespnseStatus { get; set; } = new ResponseSta();
+        public ResponseSta RespnseStatus { get; set; } = new ResponseSta();
     }
     /// <summary>
     /// 
