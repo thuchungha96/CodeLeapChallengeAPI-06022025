@@ -15,6 +15,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using NuGet.Common;
 using Newtonsoft.Json;
+using CodeLeapChallengeAPI_06022025.Data.Dto;
 
 namespace CodeLeapChallengeAPI_06022025.Controllers
 {
@@ -23,14 +24,47 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
     /// </summary>
     [ApiController]
     [Route("userinfor")]
-    public class UserInforsController : Controller
+    public class UserInforsController : BaseAPIController
     {
         private readonly CodeDBContext _context;
         private readonly IConfiguration _config;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="config"></param>
         public UserInforsController(CodeDBContext context, IConfiguration config)
         {
             _context = context;
             _config = config;
+        }
+        /// <summary>
+        /// Get Accesstoken
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
+        {
+            ResponseDto<object> r = new ResponseDto<object>();           
+            if (String.IsNullOrEmpty(request.Username) || String.IsNullOrEmpty(request.Password) || !IsValidEmail(request.Username))
+            {
+                r.RespnseStatus.StatusCode = StatusCodes.Status401Unauthorized;
+                r.RespnseStatus.ResponseMessage = "Invalid Username/Password";
+                return GetRes(r);
+            }
+            var userInfor = await _context.Users.FirstOrDefaultAsync(m => m.UserName == request.Username && m.Password == request.Password); // Can do with base64 pass but just so little bit lazzy
+
+            if (userInfor != null)
+            {
+                var token = GenerateJwtToken(request.Username);
+                r.ResponseData = token;
+                return GetRes(r);
+            } 
+
+            r.RespnseStatus.StatusCode = StatusCodes.Status401Unauthorized;
+            r.RespnseStatus.ResponseMessage = "Invalid Username/Password";
+            return GetRes(r);
         }
         /// <summary>
         /// Edit information of user
@@ -42,52 +76,25 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         [Authorize]
         public async Task<IActionResult> Edit(string id, [Bind("UserName,Password,Email,Sex,AccountType")] UserInfor userInfor)
         {
+            ResponseDto<object> r = new ResponseDto<object>();
             if (id != userInfor.UserName)
             {
-                return NotFound();
+                r.RespnseStatus.StatusCode = StatusCodes.Status400BadRequest;
+                r.RespnseStatus.ResponseMessage = "Can not edit another user information";
+                return GetRes(r);
             }
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(userInfor);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UserInforExists(userInfor.UserName))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            }
-            return Ok();
-        }
-        /// <summary>
-        /// Get Accesstoken
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("login")]
-        public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
-        {
-            if (String.IsNullOrEmpty(request.Username) || String.IsNullOrEmpty(request.Password) || !IsValidEmail(request.Username))
-            {
-                return Unauthorized();
-            }    
-            var userInfor = await _context.Users.FirstOrDefaultAsync(m => m.UserName == request.Username && m.Password == request.Password); // Can do with base64 pass but just so little bit lazzy
+                _context.Update(userInfor);
+                await _context.SaveChangesAsync();
+                r.RespnseStatus.ResponseMessage = $"Success update product Id: {userInfor.UserName}";
+                return GetRes(r);
+            } 
 
-            if (userInfor != null)
-            {
-                var token = GenerateJwtToken(request.Username);
-                return Ok(new { token });
-            }
-            return Unauthorized();
+            r.RespnseStatus.StatusCode = StatusCodes.Status405MethodNotAllowed;
+            r.RespnseStatus.ResponseMessage = "Can not edit information";
+            return GetRes(r);
         }
         /// <summary>
         /// Create new user and save into database
@@ -97,19 +104,33 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         [HttpPost("createuser")]
         public async Task<IActionResult> Create([Bind("UserName,Password,Email,Sex,AccountType")] UserInfor userInfor)
         {
+            ResponseDto<object> r = new ResponseDto<object>();
             if (ModelState.IsValid)
             {
-                var user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == userInfor.UserName); 
-                if (user != null || !IsValidEmail(userInfor.UserName))
+                if (!IsValidEmail(userInfor.UserName))
                 {
-                    return Unauthorized();
+                    r.RespnseStatus.StatusCode = StatusCodes.Status400BadRequest;
+                    r.RespnseStatus.ResponseMessage = "Invalid Username (much email format)!";
+                    return GetRes(r);
+                }
+                var user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == userInfor.UserName); 
+                if (user != null)
+                {
+                    r.RespnseStatus.StatusCode = StatusCodes.Status409Conflict;
+                    r.RespnseStatus.ResponseMessage = "Username already exited!";
+                    return GetRes(r);
                 }
 
                 _context.Add(userInfor);
                 await _context.SaveChangesAsync();
-                return Ok(new { userInfor.UserName });
+                r.RespnseStatus.StatusCode = StatusCodes.Status201Created;
+                r.RespnseStatus.ResponseMessage = $"Success created account {userInfor.UserName}";
+                return GetRes(r);
             }
-            return Ok(new { userInfor.UserName });
+
+            r.RespnseStatus.StatusCode = StatusCodes.Status405MethodNotAllowed;
+            r.RespnseStatus.ResponseMessage = "Can not edit information";
+            return GetRes(r);
         }
         /// <summary>
         /// Delete exited user
@@ -120,12 +141,17 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteConfirmed(string userName)
         {
+            ResponseDto<object> r = new ResponseDto<object>();
             var user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == userName);
             if (user == null)
-                return NotFound();
+                {
+                r.RespnseStatus.StatusCode = StatusCodes.Status404NotFound;
+                r.RespnseStatus.ResponseMessage = "can not found account!";
+                return GetRes(r);
+                }
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
-            return Ok();
+            return GetRes(r);
         }
         /// <summary>
         /// Get detail of any user by username
@@ -137,8 +163,13 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         [HttpGet("details")]
         public async Task<IActionResult> Details(string userName)
         {
+            ResponseDto<object> r = new ResponseDto<object>();
             if (String.IsNullOrEmpty(userName) == null)
-                return NotFound();
+                {
+                    r.RespnseStatus.StatusCode = StatusCodes.Status404NotFound;
+                    r.RespnseStatus.ResponseMessage = "can not found account!";
+                    return GetRes(r);
+                }
 
             var user = await _context.Users.Where(m => m.UserName == userName).Select(o => new
             {
@@ -148,9 +179,36 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             }).FirstOrDefaultAsync();
             if (user == null)
             {
-                return NotFound();
+                r.RespnseStatus.StatusCode = StatusCodes.Status404NotFound;
+                r.RespnseStatus.ResponseMessage = "can not found account!";
+                return GetRes(r);
             }
-            return Ok(JsonConvert.SerializeObject(user).ToString());
+            r.ResponseData = user;
+            return GetRes(r);
+        }
+        /// <summary>
+        /// Get detail of current user
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("detail")]
+        public async Task<IActionResult> Detail()
+        {
+            ResponseDto<object> r = new ResponseDto<object>();
+            var user = await _context.Users.Where(m => m.UserName == User.Identity.Name).Select(o => new
+            {
+                o.UserName,
+                o.Email,
+                o.Sex
+            }).FirstOrDefaultAsync();
+            if (user == null)
+            {
+                r.RespnseStatus.StatusCode = StatusCodes.Status404NotFound;
+                r.RespnseStatus.ResponseMessage = "can not found account!";
+                return GetRes(r);
+            }
+            r.ResponseData = user;
+            return GetRes(r);
         }
         [NonAction]
         private string GenerateJwtToken(string username)
