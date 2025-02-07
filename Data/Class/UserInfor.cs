@@ -20,11 +20,11 @@ namespace CodeLeapChallengeAPI_06022025.Data.Class
         /// <summary>
         /// Email
         /// </summary>
-        public string Email { get; set; }
+        public string? Email { get; set; }
         /// <summary>
         /// Sex
         /// </summary>
-        public string Sex { get; set; }
+        public string? Sex { get; set; }
         /// <summary>
         ///  Role -  0 Admin -  1 User
         /// </summary>

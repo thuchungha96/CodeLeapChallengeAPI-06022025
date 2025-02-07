@@ -8,6 +8,12 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
     /// </summary>
     public class BaseAPIController : Controller
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="src"></param>
+        /// <returns></returns>
         [NonAction]
         protected IActionResult GetRes<T>(ResponseDto<T> src)
         {

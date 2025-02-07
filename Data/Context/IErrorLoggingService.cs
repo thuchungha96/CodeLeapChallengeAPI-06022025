@@ -2,8 +2,17 @@
 
 namespace CodeLeapChallengeAPI_06022025.Data.Context
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public interface IErrorLoggingService
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="ex"></param>
+        /// <returns></returns>
         Task LogErrorAsync(HttpContext context, Exception ex);
     }
     /// <summary>

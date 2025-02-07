@@ -14,6 +14,10 @@ namespace CodeLeapChallengeAPI_06022025.Data.Context
         /// <param name="options"></param>
         public CodeDBContext(DbContextOptions<CodeDBContext> options) : base(options) { }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="modelBuilder"></param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.UseSerialColumns();
