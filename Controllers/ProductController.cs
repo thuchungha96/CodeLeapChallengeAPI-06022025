@@ -10,9 +10,13 @@ using CodeLeapChallengeAPI_06022025.Data.Context;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace CodeLeapChallengeAPI_06022025.Controllers
 {
+    /// <summary>
+    /// List api for product
+    /// </summary>
     [ApiController]
     [Route("product")]
     public class Productc : Controller
@@ -23,6 +27,12 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
         {
             _context = context;
         }
+
+        /// <summary>
+        /// Create new product and save into database
+        /// </summary>
+        /// <param name="product"></param>
+        /// <returns></returns>
         [HttpPost("create")]
         [Authorize]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,ImageURL,Note")] Product product)
@@ -39,6 +49,12 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             }
             return Ok();
         }
+        /// <summary>
+        /// Edit information of exited product
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="product"></param>
+        /// <returns></returns>
         [HttpPost("edit")]
         [Authorize]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,ImageURL,Note")] Product product)
@@ -73,6 +89,11 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             return Ok();
         }
         // POST: Product/Delete/5
+        /// <summary>
+        /// Delete product
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpPost("delete")]
         [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -86,7 +107,11 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             return Ok();
         }
 
-
+        /// <summary>
+        /// Search list of product contain string value in name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         [Authorize]
         [HttpGet("search")]
         public async Task<IActionResult> Details(string name)

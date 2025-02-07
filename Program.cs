@@ -72,6 +72,9 @@ builder.Services.AddSwaggerGen(c =>
         new String[]{}
         }
     });
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile) ;
+    c.IncludeXmlComments(xmlPath);
     c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
 
 });

@@ -18,6 +18,9 @@ using Newtonsoft.Json;
 
 namespace CodeLeapChallengeAPI_06022025.Controllers
 {
+    /// <summary>
+    /// List api for user
+    /// </summary>
     [ApiController]
     [Route("userinfor")]
     public class UserInforsController : Controller
@@ -29,7 +32,12 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             _context = context;
             _config = config;
         }
-
+        /// <summary>
+        /// Edit information of user
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="userInfor"></param>
+        /// <returns></returns>
         [HttpPost("edit")]
         [Authorize]
         public async Task<IActionResult> Edit(string id, [Bind("UserName,Password,Email,Sex,AccountType")] UserInfor userInfor)
@@ -60,7 +68,11 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             }
             return Ok();
         }
-
+        /// <summary>
+        /// Get Accesstoken
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
         {
@@ -77,6 +89,11 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             }
             return Unauthorized();
         }
+        /// <summary>
+        /// Create new user and save into database
+        /// </summary>
+        /// <param name="userInfor"></param>
+        /// <returns></returns>
         [HttpPost("createuser")]
         public async Task<IActionResult> Create([Bind("UserName,Password,Email,Sex,AccountType")] UserInfor userInfor)
         {
@@ -94,7 +111,11 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             }
             return Ok(new { userInfor.UserName });
         }
-
+        /// <summary>
+        /// Delete exited user
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <returns></returns>
         [HttpPost("delete")]
         [Authorize]
         public async Task<IActionResult> DeleteConfirmed(string userName)
@@ -106,6 +127,11 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
+        /// <summary>
+        /// Get detail of any user by username
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <returns></returns>
         // GET: UserInfors/Details/5
         [Authorize]
         [HttpGet("details")]
