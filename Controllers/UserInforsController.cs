@@ -55,7 +55,7 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
                 return GetRes(r);
             }
             var userInfor = await _context.Users.FirstOrDefaultAsync(m => m.UserName == request.Username && m.Password == request.Password); // Can do with base64 pass but just so little bit lazzy
-
+            
             if (userInfor != null)
             {
                 var token = GenerateJwtToken(request.Username);
@@ -63,7 +63,7 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
                 return GetRes(r);
             } 
 
-            r.RespnseStatus.StatusCode = StatusCodes.Status401Unauthorized;
+            r.RespnseStatus.StatusCode = StatusCodes.Status404NotFound;
             r.RespnseStatus.ResponseMessage = "Invalid Username/Password";
             return GetRes(r);
         }

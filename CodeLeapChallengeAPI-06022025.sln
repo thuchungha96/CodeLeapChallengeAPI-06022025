@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeLeapChallengeAPI-06022025", "CodeLeapChallengeAPI-06022025.csproj", "{D3C3E5AA-C4E0-4B97-BF22-D846FD10E86D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeLeapUnitest", "..\CodeLeapUnitest\CodeLeapUnitest.csproj", "{DA01A26C-7E19-434E-B5F2-CE095E13FFFC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{D3C3E5AA-C4E0-4B97-BF22-D846FD10E86D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3C3E5AA-C4E0-4B97-BF22-D846FD10E86D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3C3E5AA-C4E0-4B97-BF22-D846FD10E86D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA01A26C-7E19-434E-B5F2-CE095E13FFFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA01A26C-7E19-434E-B5F2-CE095E13FFFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA01A26C-7E19-434E-B5F2-CE095E13FFFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA01A26C-7E19-434E-B5F2-CE095E13FFFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
