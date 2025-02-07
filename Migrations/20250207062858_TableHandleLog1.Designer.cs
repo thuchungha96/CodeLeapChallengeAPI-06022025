@@ -3,6 +3,7 @@ using System;
 using CodeLeapChallengeAPI_06022025.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CodeLeapChallengeAPI_06022025.Migrations
 {
     [DbContext(typeof(CodeDBContext))]
-    partial class CodeDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250207062858_TableHandleLog1")]
+    partial class TableHandleLog1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

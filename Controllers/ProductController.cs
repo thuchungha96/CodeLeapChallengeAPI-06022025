@@ -142,6 +142,20 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             r.ResponseData = listproducts;
             return GetRes(r);
         }
+        /// <summary>
+        /// Get list error
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("geterror")]
+        public async Task<IActionResult> DetailError()
+        {
+            ResponseDto<object> r = new ResponseDto<object>();
+            var rdata = await _context.ErrorLogs.ToListAsync();
+            r.ResponseData = rdata;
+            return GetRes(r);
+        }
         [NonAction]
         private bool ProductExists(int id)
         {

@@ -212,7 +212,7 @@ namespace CodeLeapChallengeAPI_06022025.Controllers
             return GetRes(r);
         }
         /// <summary>
-        /// 
+        /// Logout
         /// </summary>
         /// <returns></returns>
         [HttpPost("logout")]

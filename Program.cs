@@ -1,4 +1,5 @@
-﻿using CodeLeapChallengeAPI_06022025.Data.Context;
+﻿using CodeLeapChallengeAPI_06022025;
+using CodeLeapChallengeAPI_06022025.Data.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<IErrorLoggingService, ErrorLoggingService>();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
@@ -97,5 +99,6 @@ app.UseAuthentication(); // Xác thực JWT trước
 app.UseAuthorization();  // Xác thực quyền truy cập
 
 app.MapControllers();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.Run();
